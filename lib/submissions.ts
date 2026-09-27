@@ -3,9 +3,9 @@ export type SubmissionInput = { requestId: string; name: string; studentNumber: 
 export type Receipt = { receipt: string; createdAt: string };
 export type Submission = Receipt & { name: string; studentNumber: string; content: string };
 export type SubmissionPage = { items: Submission[]; total: number; snapshot: number; nextBefore: number | null };
-async function request(path: string, init: RequestInit, fetcher: typeof fetch) {
+export async function request(path: string, init: RequestInit, fetcher: typeof fetch, timeout = 20000) {
   let response: Response;
-  try { response = await fetcher(API_BASE + path, { ...init, credentials: 'omit', cache: 'no-store', redirect: 'error', referrerPolicy: 'no-referrer', signal: AbortSignal.timeout(20000) }); }
+  try { response = await fetcher(API_BASE + path, { ...init, credentials: 'omit', cache: 'no-store', redirect: 'error', referrerPolicy: 'no-referrer', signal: AbortSignal.timeout(timeout) }); }
   catch { throw new ApiError('network', '连接中断，暂时无法确认结果。请保留当前页面并重试，相同内容重试不会重复保存。'); }
   let result;
   try { result = await response.json(); } catch { throw new ApiError('server', '无法确认服务器返回的结果，请保留内容后重试。'); }
@@ -17,7 +17,7 @@ async function request(path: string, init: RequestInit, fetcher: typeof fetch) {
 }
 function validReceipt(value: unknown): value is Receipt { const item = value as Receipt | null; return typeof item?.receipt === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(item.receipt) && typeof item.createdAt === 'string' && Number.isFinite(Date.parse(item.createdAt)); }
 export async function submitText(input: SubmissionInput, fetcher: typeof fetch = fetch): Promise<Receipt> {
-  const result = await request('/submissions', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(input) }, fetcher);
+  const result = await request('/submissions', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(input) }, fetcher, 65000);
   if (!validReceipt(result)) throw new ApiError('uncertain', '未收到有效回执，请保留当前页面后重试。');
   return { receipt: result.receipt, createdAt: result.createdAt };
 }
