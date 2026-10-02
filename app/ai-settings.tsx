@@ -3,6 +3,7 @@ import { LoaderCircle, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { fetchAISettings, saveAISettings, type AISettings } from '@/lib/ai-settings';
 import { type TeacherSession } from '@/lib/api';
+import { SemanticIndexPanel } from './semantic-index';
 
 export function AISettingsPanel({ session }: { session: TeacherSession }) {
   const [config, setConfig] = useState<AISettings | null>(null);
@@ -51,5 +52,6 @@ export function AISettingsPanel({ session }: { session: TeacherSession }) {
     {!config && !loading && <Button variant="outline" onClick={() => void load()}>重新加载设置</Button>}
     {error && <p className="submission-error" role="alert">{error}</p>}
     {saved && <output className="ai-saved">接口测试通过，设置已保存。学生提交时将与已有作业进行语义比对。</output>}
+    {config?.hasApiKey && <SemanticIndexPanel session={session} revision={config.revision} disabled={busy || loading}/>}
   </details>;
 }

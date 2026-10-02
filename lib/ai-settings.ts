@@ -3,6 +3,12 @@ import { request } from './submissions.ts';
 export const MAX_WORDS = 150;
 export const countWords = (text: string) => Array.from(text.replace(/\s/gu, '')).length;
 export type AISettings = { endpoint: string; model: string; hasApiKey: boolean; revision: number; updatedAt: string | null };
+export type SemanticIndexStatus = { enabled: boolean; total: number; ready: number; model: string | null };
+export async function semanticIndex(session: TeacherSession, prepare = false, fetcher: typeof fetch = fetch): Promise<SemanticIndexStatus> {
+  const value = await request('/semantic-index', { method: prepare ? 'POST' : 'GET', headers: { Authorization: 'Bearer ' + session.token, ...(prepare ? { 'Content-Type': 'application/json' } : {}) }, ...(prepare ? { body: '{}' } : {}) }, fetcher, 70000) as SemanticIndexStatus;
+  if (!value || typeof value.enabled !== 'boolean' || !Number.isSafeInteger(value.total) || !Number.isSafeInteger(value.ready) || value.total < 0 || value.ready < 0 || value.ready > value.total || !(value.model === null || typeof value.model === 'string')) throw new ApiError('invalid', '加速准备状态读取失败，请重试。');
+  return { enabled: value.enabled, total: value.total, ready: value.ready, model: value.model };
+}
 export async function fetchPolicy(fetcher: typeof fetch = fetch) {
   const result = await request('/submission-policy', {}, fetcher);
   if (result?.maxWords !== MAX_WORDS || typeof result.aiReady !== 'boolean') throw new ApiError('invalid', '提交规则读取失败，请重新检查。');
