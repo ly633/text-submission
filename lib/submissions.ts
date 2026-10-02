@@ -17,7 +17,7 @@ export async function request(path: string, init: RequestInit, fetcher: typeof f
 }
 function validReceipt(value: unknown): value is Receipt { const item = value as Receipt | null; return typeof item?.receipt === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(item.receipt) && typeof item.createdAt === 'string' && Number.isFinite(Date.parse(item.createdAt)); }
 export async function submitText(input: SubmissionInput, fetcher: typeof fetch = fetch): Promise<Receipt> {
-  const result = await request('/submissions', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(input) }, fetcher, 65000);
+  const result = await request('/submissions', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(input) }, fetcher, 70000);
   if (!validReceipt(result)) throw new ApiError('uncertain', '未收到有效回执，请保留当前页面后重试。');
   return { receipt: result.receipt, createdAt: result.createdAt };
 }

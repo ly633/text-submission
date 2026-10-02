@@ -17,5 +17,5 @@ export async function fetchAISettings(session: TeacherSession, fetcher: typeof f
   return settings(await request('/ai-settings', { headers: { Authorization: 'Bearer ' + session.token } }, fetcher));
 }
 export async function saveAISettings(session: TeacherSession, input: { endpoint: string; model: string; apiKey: string; revision: number }, fetcher: typeof fetch = fetch) {
-  return settings(await request('/ai-settings', { method: 'POST', headers: { Authorization: 'Bearer ' + session.token, 'Content-Type': 'application/json' }, body: JSON.stringify(input) }, fetcher, 35000));
+  return settings(await request('/ai-settings', { method: 'POST', headers: { Authorization: 'Bearer ' + session.token, 'Content-Type': 'application/json' }, body: JSON.stringify(input) }, fetcher, 70000));
 }
